@@ -1,0 +1,73 @@
+{% if tasks %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr class="{% if task.status == 'Completed' %}table-success{% elif task.due_date and task.due_date < today and task.status == 'Pending' %}table-danger{% endif %}">
+                    <td>
+                        <button class="btn btn-sm {% if task.status == 'Completed' %}btn-success{% else %}btn-outline-secondary{% endif %}"
+                                onclick="toggleTask(event, {{ task.id }})">
+                            <i class="fas {% if task.status == 'Completed' %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <strong>{{ task.title }}</strong>
+                        {% if task.due_date and task.due_date < today and task.status == 'Pending' %}
+                            <span class="badge bg-danger ms-1">Overdue</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ task.description or 'No description' }}</td>
+                    <td>
+                        <span class="badge {% if task.priority == 'High' %}bg-danger{% elif task.priority == 'Medium' %}bg-warning{% else %}bg-info{% endif %}">
+                            {{ task.priority }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if task.due_date %}
+                            {{ task.due_date.strftime('%Y-%m-%d') }}
+                        {% else %}
+                            <span class="text-muted">No due date</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary"
+                                    data-task='{{ {
+                                        "id": task.id,
+                                        "title": task.title,
+                                        "description": task.description or '' ,
+                                        "priority": task.priority,
+                                        "status": task.status,
+                                        "due_date": task.due_date.strftime('%Y-%m-%d') if task.due_date else ''
+                                    } | tojson }}'
+                                    onclick="editTask(event)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(event, {{ task.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No tasks found</h5>
+        <p class="text-muted">Create your first task using the form above!</p>
+    </div>
+{% endif %}
+
